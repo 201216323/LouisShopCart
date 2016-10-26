@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-       android:id="@+id/id_rl_head"
+
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@android:color/transparent"
@@ -8,7 +8,7 @@
 
         <ImageView
             android:id="@+id/id_iv_back"
-            android:layout_width="wrap_content"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_gravity="center_vertical"

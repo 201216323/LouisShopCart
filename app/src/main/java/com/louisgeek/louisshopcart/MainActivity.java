@@ -3,9 +3,7 @@ package com.louisgeek.louisshopcart;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
@@ -33,21 +31,21 @@ public class MainActivity extends AppCompatActivity {
     List<List<Map<String, Object>>> childMapList_list = new ArrayList<List<Map<String, Object>>>();
 
     MyBaseExpandableListAdapter myBaseExpandableListAdapter;
-    CheckBox id_cb_select_all;
-    LinearLayout id_ll_normal_all_state;
-    LinearLayout id_ll_editing_all_state;
+    CheckBox id_cb_select_all;//全选
+    LinearLayout id_ll_normal_all_state;//正常状态下
+    LinearLayout id_ll_editing_all_state;//编辑状态下
     ExpandableListView expandableListView;
-    RelativeLayout id_rl_cart_is_empty;
-    RelativeLayout id_rl_foot;
+    RelativeLayout id_rl_cart_is_empty;//为空时候的相对布局
+    RelativeLayout id_rl_foot;//下面的布局
 
-    TextView id_tv_edit_all;
+    TextView id_tv_edit_all;//右上角编辑
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //initData();
+        //初始化购物车中的数据
         initCartData();
 
         expandableListView = (ExpandableListView) findViewById(R.id.id_elv_listview);
@@ -62,10 +60,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        //讲所有的数据展开，去掉该方法就不会展开了
         for (int i = 0; i < parentMapList.size(); i++) {
             expandableListView.expandGroup(i);
         }
-
+        //设置该点击事件,返回true，不可收缩，返回false可收缩。
+//        expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+//            @Override
+//            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+//                return true;
+//            }
+//        });
 
         ImageView id_iv_back = (ImageView) findViewById(R.id.id_iv_back);
         id_iv_back.setOnClickListener(new View.OnClickListener() {
@@ -101,14 +106,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (v instanceof TextView) {
                     TextView tv = (TextView) v;
+                    //点击编辑的时候
                     if (MyBaseExpandableListAdapter.EDITING.equals(tv.getText())) {
                         myBaseExpandableListAdapter.setupEditingAll(true);
                         tv.setText(MyBaseExpandableListAdapter.FINISH_EDITING);
-                        changeFootShowDeleteView(true);//这边类似的功能 后期待使用观察者模式
+                        changeFootShowDeleteView(true);//
                     } else {
+                        ////点击编辑的时候
                         myBaseExpandableListAdapter.setupEditingAll(false);
                         tv.setText(MyBaseExpandableListAdapter.EDITING);
-                        changeFootShowDeleteView(false);//这边类似的功能 后期待使用观察者模式
+                        changeFootShowDeleteView(false);//
                     }
 
                 }
@@ -116,13 +123,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         id_cb_select_all = (CheckBox) findViewById(R.id.id_cb_select_all);
-      /* 要么遍历判断再选择 id_cb_select_all.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-               // Toast.makeText(MainActivity.this, "all isChecked：" + isChecked, Toast.LENGTH_SHORT).show();
-                myBaseExpandableListAdapter.setupAllChecked(isChecked);
-            }
-        });*/
+
         id_cb_select_all.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,21 +143,22 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "click：结算", Toast.LENGTH_SHORT).show();
             }
         });
+        ////选中 商品的接口
         myBaseExpandableListAdapter.setOnGoodsCheckedChangeListener(new MyBaseExpandableListAdapter.OnGoodsCheckedChangeListener() {
             @Override
             public void onGoodsCheckedChange(int totalCount, double totalPrice) {
-                id_tv_totalPrice.setText(String.format(getString(R.string.total), totalPrice));
-                id_tv_totalCount_jiesuan.setText(String.format(getString(R.string.jiesuan), totalCount));
+                id_tv_totalPrice.setText(String.format(getString(R.string.total), ""+totalPrice));
+                id_tv_totalCount_jiesuan.setText(String.format(getString(R.string.jiesuan), ""+totalCount));
             }
         });
-
+        //全部选择的自定义接口
         myBaseExpandableListAdapter.setOnAllCheckedBoxNeedChangeListener(new MyBaseExpandableListAdapter.OnAllCheckedBoxNeedChangeListener() {
             @Override
             public void onCheckedBoxNeedChange(boolean allParentIsChecked) {
                 id_cb_select_all.setChecked(allParentIsChecked);
             }
         });
-
+        //编辑改变的接口
         myBaseExpandableListAdapter.setOnEditingTvChangeListener(new MyBaseExpandableListAdapter.OnEditingTvChangeListener() {
             @Override
             public void onEditingTvChange(boolean allIsEditing) {
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+//是否有商品的接口
         myBaseExpandableListAdapter.setOnCheckHasGoodsListener(new MyBaseExpandableListAdapter.OnCheckHasGoodsListener() {
             @Override
             public void onCheckHasGoods(boolean isHasGoods) {
@@ -177,19 +179,18 @@ public class MainActivity extends AppCompatActivity {
         /**====include进来方式可能会导致view覆盖listview的最后一个item 解决*/
         //在onCreate方法中一般没办法直接调用view.getHeight方法来获取到控件的高度
         id_rl_foot = (RelativeLayout) findViewById(R.id.id_rl_foot);
-        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        id_rl_foot.measure(w, h);
-        int r_width = id_rl_foot.getMeasuredWidth();
-        int r_height = id_rl_foot.getMeasuredHeight();
-        Log.i("MeasureSpec", "MeasureSpec r_width = " + r_width);
-        Log.i("MeasureSpec", "MeasureSpec r_height = " + r_height);
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int top = dp2px(this, 48);
-        lp.setMargins(0, top, 0, r_height);//48
-
-        expandableListView.setLayoutParams(lp);
-        /**==========*/
+        //原来布局中没有设置android:layout_below="@+id/id_rl_head"和android:layout_above="@+id/id_rl_foot"这两个属性所以会出现这种效果。
+        //布局中已经设置了，这里就不需要给expandableListView设置Margin了。
+//        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+//        int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+//        id_rl_foot.measure(w, h);
+//        int r_width = id_rl_foot.getMeasuredWidth();
+//        int r_height = id_rl_foot.getMeasuredHeight();
+//
+//        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        int top = dp2px(this, 48);
+//        lp.setMargins(0, top, 0, r_height);//48
+//        expandableListView.setLayoutParams(lp);
 
 
         if (parentMapList != null && parentMapList.size() > 0) {
@@ -197,26 +198,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             setupViewsShow(false);
         }
-
-    /*    *//**
-         * 第一个参数  应用程序接口 this
-         * 第二个父列List<?extends Map<String,Object>>集合 为父列提供数据
-         * 第三个参数  父列显示的组件资源文件
-         * 第四个参数  键值列表 父列Map字典的key
-         * 第五个要显示的父列组件id
-         * 第六个 子列的显示资源文件
-         * 第七个参数 键值列表的子列Map字典的key
-         * 第八个要显示子列的组件id
-         *
-         * 第五个参数groupTo - The group views that should display column in the "groupFrom" parameter. These should all be TextViews. The first N views in this list are given the values of the first N columns in the groupFrom parameter.
-         *//*
-
-        SimpleExpandableListAdapter simpleExpandableListAdapter = new SimpleExpandableListAdapter(
-                this, parentMapList, R.layout.parent_layout, new String[] { "parentName"},
-                new int[] { R.id.tv_title_parent}, childMapList_list, R.layout.child_layout,
-                new String[] { "childName"}, new int[] { R.id.tv_items_child});
-        expandableListView.setAdapter(simpleExpandableListAdapter);*/
-
     }
 
     private void setupViewsShow(boolean isHasGoods) {
@@ -263,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
             }
             //提供父列表的数据
             Map<String, Object> parentMap = new HashMap<String, Object>();
-
+                                           //  ""+0 专营店0  false false
             parentMap.put("parentName", new StoreBean("" + i, store + i, false, false));
           /*  if (i%2==0) {
                 parentMap.put("parentIcon", R.mipmap.ic_launcher);

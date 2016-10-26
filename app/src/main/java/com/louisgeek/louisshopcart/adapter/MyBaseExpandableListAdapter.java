@@ -29,13 +29,24 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
     List<Map<String, Object>> parentMapList;
     List<List<Map<String, Object>>> childMapList_list;
     Context context;
+
     int totalCount = 0;
     double totalPrice = 0.00;
+
     public static final String EDITING = "编辑";
     public static final String FINISH_EDITING = "完成";
+
+    //全部选择的自定义接口
     OnAllCheckedBoxNeedChangeListener onAllCheckedBoxNeedChangeListener;
     OnGoodsCheckedChangeListener onGoodsCheckedChangeListener;
     OnCheckHasGoodsListener onCheckHasGoodsListener;
+    OnEditingTvChangeListener onEditingTvChangeListener;
+
+    public MyBaseExpandableListAdapter(Context context, List<Map<String, Object>> parentMapList, List<List<Map<String, Object>>> childMapList_list) {
+        this.parentMapList = parentMapList;
+        this.childMapList_list = childMapList_list;
+        this.context = context;
+    }
 
     public void setOnCheckHasGoodsListener(OnCheckHasGoodsListener onCheckHasGoodsListener) {
         this.onCheckHasGoodsListener = onCheckHasGoodsListener;
@@ -45,7 +56,6 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         this.onEditingTvChangeListener = onEditingTvChangeListener;
     }
 
-    OnEditingTvChangeListener onEditingTvChangeListener;
 
     public void setOnGoodsCheckedChangeListener(OnGoodsCheckedChangeListener onGoodsCheckedChangeListener) {
         this.onGoodsCheckedChangeListener = onGoodsCheckedChangeListener;
@@ -53,12 +63,6 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
 
     public void setOnAllCheckedBoxNeedChangeListener(OnAllCheckedBoxNeedChangeListener onAllCheckedBoxNeedChangeListener) {
         this.onAllCheckedBoxNeedChangeListener = onAllCheckedBoxNeedChangeListener;
-    }
-
-    public MyBaseExpandableListAdapter(Context context, List<Map<String, Object>> parentMapList, List<List<Map<String, Object>>> childMapList_list) {
-        this.parentMapList = parentMapList;
-        this.childMapList_list = childMapList_list;
-        this.context = context;
     }
 
 
@@ -101,7 +105,7 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean hasStableIds() {
         //return false;
-        return true;
+        return true;//默认返回的是false。
     }
 
     //设置父item组件
@@ -128,10 +132,11 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         groupViewHolder.tv_title_parent.setText(parentName);
 
         if (storeBean.isEditing()) {
-            groupViewHolder.id_tv_edit.setText(FINISH_EDITING);
+            groupViewHolder.id_tv_edit.setText(FINISH_EDITING);//完成
         } else {
-            groupViewHolder.id_tv_edit.setText(EDITING);
+            groupViewHolder.id_tv_edit.setText(EDITING);//编辑
         }
+        //店铺中的编辑按钮
         groupViewHolder.id_tv_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,7 +149,7 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
                 textView.setText(text);
                 setupEditing(groupPosition);
 
-                onEditingTvChangeListener.onEditingTvChange(dealAllEditingIsEditing());
+//                onEditingTvChangeListener.onEditingTvChange(dealAllEditingIsEditing());
             }
         });
 
@@ -164,37 +169,9 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 setupOneParentAllChildChecked(!nowBeanChecked, groupPosition);
                 //控制总checkedbox 接口
-                onAllCheckedBoxNeedChangeListener.onCheckedBoxNeedChange(dealAllParentIsChecked());
+//                onAllCheckedBoxNeedChangeListener.onCheckedBoxNeedChange(dealAllParentIsChecked());
             }
         });
-        //遍历改变也会触发这个方法
-     /*   groupViewHolder.id_cb_select_parent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                boolean allParentIsChecked=dealAllParentIsChecked();
-                Log.d(TAG, "=====onCheckedChanged:  ==============");
-                Log.d(TAG, "=====onCheckedChanged: allParentIsChecked:"+allParentIsChecked);
-                Log.d(TAG, "=====onCheckedChanged: groupPosition:"+groupPosition);
-                Log.d(TAG, "=====onCheckedChanged: isChecked:" + isChecked);
-                //Toast.makeText(context, "allParentIsChecked！！！ isChecked："+groupPosition+"=" + isChecked, Toast.LENGTH_SHORT).show();
-
-                //控制总checkedbox 接口
-                onAllCheckedBoxChangeListener.OnCheckedBoxChange(allParentIsChecked);
-
-        });*/
-
-        /*ImageView iv_img_parent=(ImageView)convertView.findViewById(R.id.iv_img_parent);
-        int parentIcon = Integer.parseInt(parentMapList.get(groupPosition).get("parentIcon").toString());
-        iv_img_parent.setImageResource(parentIcon);*/
-
-      /*  ImageView iv_img_parent_right=(ImageView)convertView.findViewById(R.id.iv_img_parent_right);
-        //判断isExpanded就可以控制是按下还是关闭，同时更换图片
-        if(isExpanded){
-            iv_img_parent_right.setImageResource(R.mipmap.channel_expandablelistview_top_icon);
-        }else{
-            iv_img_parent_right.setImageResource(R.mipmap.channel_expandablelistview_bottom_icon);
-        }*/
         return convertView;
     }
 
@@ -205,10 +182,13 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.child_layout, null);
             childViewHolder = new ChildViewHolder();
+            //商品名称
             childViewHolder.tv_items_child = (TextView) convertView
                     .findViewById(R.id.tv_items_child);
+            //checkbox
             childViewHolder.id_cb_select_child = (CheckBox) convertView
                     .findViewById(R.id.id_cb_select_child);
+            //
             childViewHolder.id_ll_normal = (LinearLayout) convertView
                     .findViewById(R.id.id_ll_normal);
             childViewHolder.id_ll_edtoring = (LinearLayout) convertView
@@ -255,20 +235,22 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         });
 
         childViewHolder.tv_items_child.setText(goodsBean.getName());
-        childViewHolder.id_tv_price.setText(String.format(context.getString(R.string.price), goodsBean.getPrice()));
+        childViewHolder.id_tv_price.setText(String.format(context.getString(R.string.price), "" + goodsBean.getPrice()));
         // childViewHolder.id_tv_price.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG);//数字划线效果
         childViewHolder.id_tv_price.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG); // 设置中划线并抗锯齿
-        childViewHolder.id_tv_discount_price.setText(String.format(context.getString(R.string.price), goodsBean.getDiscountPrice()));
+        childViewHolder.id_tv_discount_price.setText(String.format(context.getString(R.string.price), "" + goodsBean.getDiscountPrice()));
         childViewHolder.tv_items_child_desc.setText(String.valueOf(goodsBean.getDesc()));
 
         childViewHolder.id_tv_count.setText(String.format(context.getString(R.string.good_count), goodsBean.getCount()));
         childViewHolder.id_tv_count_now.setText(String.valueOf(goodsBean.getCount()));
 
         double priceNow = goodsBean.getCount() * goodsBean.getDiscountPrice();//小结
-        childViewHolder.id_tv_price_now.setText(String.format(context.getString(R.string.price), priceNow));
+        childViewHolder.id_tv_price_now.setText(String.format(context.getString(R.string.price), "" + priceNow));
         childViewHolder.id_tv_des_now.setText(goodsBean.getDesc());
 
         childViewHolder.id_cb_select_child.setChecked(goodsBean.isChecked());
+
+        //每一个商品中的checkbox的点击事件
         childViewHolder.id_cb_select_child.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -277,9 +259,6 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
                 goodsBean.setIsChecked(!nowBeanChecked);
 
                 boolean isOneParentAllChildIsChecked = dealOneParentAllChildIsChecked(groupPosition);
-                Log.d(TAG, "getChildView:onClick:  ==============");
-                Log.d(TAG, "getChildView:onClick:isOneParentAllChildIsChecked:" + isOneParentAllChildIsChecked);
-
                 StoreBean storeBean = (StoreBean) parentMapList.get(groupPosition).get("parentName");
                 storeBean.setIsChecked(isOneParentAllChildIsChecked);
 
@@ -327,36 +306,18 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
                 removeOneGood(groupPosition, childPosition);
             }
         });
-     /*   id_cb_select_child.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                GoodsBean goodsBean = (GoodsBean) childMapList_list.get(groupPosition).get(childPosition).get("childName");
-                //更新数据
-                goodsBean.setIsChecked(isChecked);
-                boolean isAllChecked=dealOneParentAllChildIsChecked(groupPosition,isChecked);
-                if (isAllChecked){
-                    StoreBean storeBean= (StoreBean) parentMapList.get(groupPosition).get("parentName");
-                    storeBean.setIsChecked(true);
-                }
-
-                Toast.makeText(context, "CHALID :isAllChecked" + isAllChecked, Toast.LENGTH_SHORT).show();
-                notifyDataSetChanged();
-            }
-        });*/
 
         return convertView;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        // return false;
-        return true;
+
+        return true;//默认就是返回的true
     }
 
     //供全选按钮调用
     public void setupAllChecked(boolean isChecked) {
-        Log.d(TAG, "setupAllChecked: ============");
-        Log.d(TAG, "setupAllChecked: isChecked：" + isChecked);
 
         for (int i = 0; i < parentMapList.size(); i++) {
             StoreBean storeBean = (StoreBean) parentMapList.get(i).get("parentName");
@@ -373,9 +334,7 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     private void setupOneParentAllChildChecked(boolean isChecked, int groupPosition) {
-        Log.d(TAG, "setupOneParentAllChildChecked: ============");
-        Log.d(TAG, "setupOneParentAllChildChecked: groupPosition:" + groupPosition);
-        Log.d(TAG, "setupOneParentAllChildChecked: isChecked：" + isChecked);
+
         StoreBean storeBean = (StoreBean) parentMapList.get(groupPosition).get("parentName");
         storeBean.setIsChecked(isChecked);
 
@@ -389,9 +348,7 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     public boolean dealOneParentAllChildIsChecked(int groupPosition) {
-        Log.d(TAG, "dealOneParentAllChildIsChecked: ============");
-        Log.d(TAG, "dealOneParentAllChildIsChecked: groupPosition：" + groupPosition);
-        // StoreBean storeBean= (StoreBean) parentMapList.get(groupPosition).get("parentName");
+
         List<Map<String, Object>> childMapList = childMapList_list.get(groupPosition);
         for (int j = 0; j < childMapList.size(); j++) {
             GoodsBean goodsBean = (GoodsBean) childMapList.get(j).get("childName");
@@ -413,8 +370,8 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
+    //计算价钱
     public void dealPrice() {
-        // showList();
         totalCount = 0;
         totalPrice = 0.00;
         for (int i = 0; i < parentMapList.size(); i++) {
@@ -494,18 +451,19 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         dealPrice();
     }
 
+    //删除一条数据
     public void removeOneGood(int groupPosition, int childPosition) {
         //StoreBean storeBean = (StoreBean) parentMapList.get(groupPosition).get("parentName");
         List<Map<String, Object>> childMapList = childMapList_list.get(groupPosition);
-       // GoodsBean goodsBean = (GoodsBean) childMapList.get(childPosition).get("childName");
+        // GoodsBean goodsBean = (GoodsBean) childMapList.get(childPosition).get("childName");
         childMapList.remove(childPosition);
 
         //通过子项
-       if (childMapList!=null&&childMapList.size()>0){
+        if (childMapList != null && childMapList.size() > 0) {
 
-        }else {
-             parentMapList.remove(groupPosition);
-             childMapList_list.remove(groupPosition);//！！！！因为parentMapList和childMapList_list是pos关联的  得保持一致
+        } else {
+            parentMapList.remove(groupPosition);
+            childMapList_list.remove(groupPosition);//！！！！因为parentMapList和childMapList_list是pos关联的  得保持一致
         }
         if (parentMapList != null && parentMapList.size() > 0) {
             onCheckHasGoodsListener.onCheckHasGoods(true);//
@@ -516,77 +474,31 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
         dealPrice();
     }
 
+    //删除所有的数据
     public void removeGoods() {
-    /*    for (int i = 0; i <parentMapList.size(); i++) {
-            StoreBean storeBean= (StoreBean) parentMapList.get(i).get("parentName");
 
-                List<Map<String, Object>> childMapList = childMapList_list.get(i);
-                for (int j = 0; j < childMapList.size(); j++) {
-                    GoodsBean goodsBean = (GoodsBean) childMapList.get(j).get("childName");
-                    Log.d(TAG, "removeGoods:============goodsBean:" + goodsBean.isChecked());
-                    if (goodsBean.isChecked()) {
-                        childMapList.remove(j);
-                        j--;//!!!!!!!!!!  List remove方法比较特殊 每移除一个元素以后再把pos移回来
-                    }
-                }
-        }*/
-
-        for (int i = parentMapList.size()-1; i>=0; i--) {//倒过来遍历  remove
-            StoreBean storeBean= (StoreBean) parentMapList.get(i).get("parentName");
-            if (storeBean.isChecked()){
+        for (int i = parentMapList.size() - 1; i >= 0; i--) {//倒过来遍历  remove
+            StoreBean storeBean = (StoreBean) parentMapList.get(i).get("parentName");
+            if (storeBean.isChecked()) {
                 parentMapList.remove(i);
                 childMapList_list.remove(i);
-            }else {
-            List<Map<String, Object>> childMapList = childMapList_list.get(i);
-            for (int j = childMapList.size()-1; j >=0; j--) {//倒过来遍历  remove
-                GoodsBean goodsBean = (GoodsBean) childMapList.get(j).get("childName");
-                if (goodsBean.isChecked()) {
-                    childMapList.remove(j);
-                }
-            }
-            }
-
-        }
-       // showList("begin###############");
-        /**1.不要边遍历边删除，容易出现数组越界的情况<br>
-         * 2.现将要删除的对象放进相应的列表容器中，待遍历完后，以removeAll的方式进行删除*/  //还是有问题
-        /*List<Map<String, Object>> needRemoreParentMapList = new ArrayList<>();// 待删除的组元素列表
-        List<List<Map<String, Object>>> needRemoreChildMapList_List = new ArrayList<>();// 待删除的  最大的
-
-        for (int i = 0; i < parentMapList.size(); i++) {
-            StoreBean storeBean = (StoreBean) parentMapList.get(i).get("parentName");
-
-            if(storeBean.isChecked()){
-                needRemoreParentMapList.add(parentMapList.get(i));
-                needRemoreChildMapList_List.add(childMapList_list.get(i));//！！！！因为parentMapList和childMapList_list是pos关联的  得保持一致
-            }
-                //
-                List<Map<String, Object>> childMapList = childMapList_list.get(i);//最大的
-
-                List<Map<String, Object>> needRemoreChildMapList = new ArrayList<>();// 待删除的子元素列表
-
-                for (int j = 0; j < childMapList.size(); j++) {
+            } else {
+                List<Map<String, Object>> childMapList = childMapList_list.get(i);
+                for (int j = childMapList.size() - 1; j >= 0; j--) {//倒过来遍历  remove
                     GoodsBean goodsBean = (GoodsBean) childMapList.get(j).get("childName");
                     if (goodsBean.isChecked()) {
-                        needRemoreChildMapList.add(childMapList.get(j));
+                        childMapList.remove(j);
                     }
                 }
-
-                childMapList.removeAll(needRemoreChildMapList);//正式删除子元素  不是childMapList_list  ！！！
+            }
 
         }
-        parentMapList.removeAll(needRemoreParentMapList);//正式删除父元素
-        Log.d(TAG, "removeGoods: needRemoreChildMapList_List"+needRemoreChildMapList_List);
-        childMapList_list.remove(needRemoreChildMapList_List);//！！！！因为parentMapList和childMapList_list是pos关联的  得保持一致
-*/
-        //!!!!!!!!!!!!!!!删除完 状态需要重置   待思考  why？
-        //resetViewAfterDelete();
         if (parentMapList != null && parentMapList.size() > 0) {
             onCheckHasGoodsListener.onCheckHasGoods(true);//
         } else {
             onCheckHasGoodsListener.onCheckHasGoods(false);//
         }
-        //showList("after@@@@@@@@@@@@@@@@@@@@@@@");
+
         notifyDataSetChanged();//
         dealPrice();//重新计算
     }
@@ -607,33 +519,18 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     void showList(String tempStr) {
-        Log.d(TAG, "showList:"+tempStr);
+        Log.d(TAG, "showList:" + tempStr);
         for (int i = 0; i < parentMapList.size(); i++) {
             StoreBean storeBean = (StoreBean) parentMapList.get(i).get("parentName");
-            Log.d(TAG, "showList:  parentName:【" + storeBean.getName()+"】isChecked:" + storeBean.isChecked());
+            Log.d(TAG, "showList:  parentName:【" + storeBean.getName() + "】isChecked:" + storeBean.isChecked());
             List<Map<String, Object>> childMapList = childMapList_list.get(i);
             for (int j = 0; j < childMapList.size(); j++) {
                 GoodsBean goodsBean = (GoodsBean) childMapList.get(j).get("childName");
-                Log.d(TAG, "showList:  childName:" + goodsBean.getName()+"isChecked:" + goodsBean.isChecked());
+                Log.d(TAG, "showList:  childName:" + goodsBean.getName() + "isChecked:" + goodsBean.isChecked());
             }
         }
     }
 
-    public interface OnAllCheckedBoxNeedChangeListener {
-        void onCheckedBoxNeedChange(boolean allParentIsChecked);
-    }
-
-    public interface OnEditingTvChangeListener {
-        void onEditingTvChange(boolean allIsEditing);
-    }
-
-    public interface OnGoodsCheckedChangeListener {
-        void onGoodsCheckedChange(int totalCount, double totalPrice);
-    }
-
-    public interface OnCheckHasGoodsListener {
-        void onCheckHasGoods(boolean isHasGoods);
-    }
 
     class GroupViewHolder {
         TextView tv_title_parent;
@@ -662,4 +559,24 @@ public class MyBaseExpandableListAdapter extends BaseExpandableListAdapter {
 
     }
 
+
+    //全部选择的自定义接口
+    public interface OnAllCheckedBoxNeedChangeListener {
+        void onCheckedBoxNeedChange(boolean allParentIsChecked);
+    }
+
+    //编辑改变的接口
+    public interface OnEditingTvChangeListener {
+        void onEditingTvChange(boolean allIsEditing);
+    }
+
+    //选中 商品的接口
+    public interface OnGoodsCheckedChangeListener {
+        void onGoodsCheckedChange(int totalCount, double totalPrice);
+    }
+
+    //是否有商品的接口
+    public interface OnCheckHasGoodsListener {
+        void onCheckHasGoods(boolean isHasGoods);
+    }
 }

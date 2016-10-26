@@ -5,13 +5,16 @@
     android:layout_height="match_parent"
     tools:context="com.louis.louisexpandablelistviewdemo.MainActivity">
 
-    <include layout="@layout/header_layout"
+    <include
+        android:id="@+id/id_rl_head"
+        layout="@layout/header_layout"
         />
 
     <RelativeLayout
         android:id="@+id/id_rl_cart_is_empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/id_rl_head"
         android:background="#FCFCFC"
         android:gravity="center"
         android:layout_marginTop="48dp"
@@ -39,20 +42,19 @@
         android:id="@+id/id_elv_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:cacheColorHint="#00000000"
-        android:divider="#ebebeb"
+        android:cacheColorHint="#00ff0000"
+        android:layout_below="@+id/id_rl_head"
+        android:layout_above="@+id/id_rl_foot"
+        android:divider="#eeeeee"
         android:groupIndicator="@null"
-        android:dividerHeight="2dp"
-        android:footerDividersEnabled="false"
+        android:dividerHeight="1dp"
+        android:footerDividersEnabled="true"
         android:visibility="visible"
         >
     </ExpandableListView>
-    
-   
-    <!--include进来方式可能会导致view覆盖listview的最后一个item  代码里动态改变listview下面的距离
-    android:layout_below="@id/id_elv" 有点问题 why?
-    -->
+
     <include
+        android:id="@+id/id_rl_foot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
